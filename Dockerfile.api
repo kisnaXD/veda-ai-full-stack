@@ -12,7 +12,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV PUPPETEER_SKIP_DOWNLOAD=true
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-ENV NODE_ENV=production
 
 WORKDIR /app
 
@@ -21,12 +20,14 @@ COPY packages/shared/package.json packages/shared/
 COPY apps/api/package.json apps/api/
 COPY apps/web/package.json apps/web/
 
-RUN npm ci --workspaces --include-workspace-root --ignore-scripts
+RUN npm ci --workspaces --include-workspace-root --include=dev --ignore-scripts
 
 COPY packages/shared packages/shared
 COPY apps/api apps/api
 
 RUN npm run build -w @vedaai/shared && npm run build -w @vedaai/api
+
+ENV NODE_ENV=production
 
 EXPOSE 4000
 
