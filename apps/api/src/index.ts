@@ -10,12 +10,39 @@ import { pdfRouter } from "./routes/pdf";
 import { errorHandler } from "./middleware/error";
 import { startWorkers } from "./queue/worker";
 
+function parseOrigins(raw: string): Array<string | RegExp> {
+  return raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .map((s) => {
+      if (!s.includes("*")) return s;
+      const escaped = s.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*");
+      return new RegExp(`^${escaped}$`);
+    });
+}
+
+const allowedOrigins = parseOrigins(config.corsOrigin);
+
 async function main() {
   await connectMongo();
   await redisConnection.ping();
 
   const app = express();
-  app.use(cors({ origin: config.corsOrigin, credentials: true }));
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        for (const o of allowedOrigins) {
+          if (typeof o === "string" ? o === origin : o.test(origin)) {
+            return callback(null, true);
+          }
+        }
+        return callback(new Error(`CORS: origin ${origin} not allowed`));
+      },
+      credentials: true,
+    }),
+  );
   app.use(express.json({ limit: "2mb" }));
 
   app.get("/healthz", (_req, res) => res.json({ ok: true, ts: Date.now() }));

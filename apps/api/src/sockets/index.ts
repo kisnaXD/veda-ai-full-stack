@@ -10,9 +10,34 @@ import {
 
 let io: IOServer | null = null;
 
+function parseOrigins(raw: string): Array<string | RegExp> {
+  return raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .map((s) => {
+      if (!s.includes("*")) return s;
+      const escaped = s.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*");
+      return new RegExp(`^${escaped}$`);
+    });
+}
+
+const allowedOrigins = parseOrigins(config.corsOrigin);
+
 export function initSocketServer(httpServer: HttpServer): IOServer {
   io = new IOServer(httpServer, {
-    cors: { origin: config.corsOrigin, credentials: true },
+    cors: {
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        for (const o of allowedOrigins) {
+          if (typeof o === "string" ? o === origin : o.test(origin)) {
+            return callback(null, true);
+          }
+        }
+        return callback(new Error(`CORS: origin ${origin} not allowed`));
+      },
+      credentials: true,
+    },
   });
 
   io.on("connection", (socket) => {
