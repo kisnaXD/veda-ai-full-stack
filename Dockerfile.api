@@ -1,0 +1,33 @@
+FROM node:20-bookworm-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    chromium \
+    fonts-liberation \
+    libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 \
+    libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 \
+    libgbm1 libpango-1.0-0 libcairo2 libasound2 libxshmfence1 \
+    ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
+ENV PUPPETEER_SKIP_DOWNLOAD=true
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+ENV NODE_ENV=production
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+COPY packages/shared/package.json packages/shared/
+COPY apps/api/package.json apps/api/
+COPY apps/web/package.json apps/web/
+
+RUN npm ci --workspaces --include-workspace-root --ignore-scripts
+
+COPY packages/shared packages/shared
+COPY apps/api apps/api
+
+RUN npm run build -w @vedaai/shared && npm run build -w @vedaai/api
+
+EXPOSE 4000
+
+CMD ["node", "apps/api/dist/index.js"]
