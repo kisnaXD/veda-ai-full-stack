@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700&family=Inter:wght@400;500;600;700&display=swap');
+
+html, body { background: #E6E6E6; color: #303030; }
+body { font-family: 'Bricolage Grotesque', system-ui, sans-serif; letter-spacing: -0.02em; }
+
+* { box-sizing: border-box; }
+
+.paper-font { font-family: Georgia, 'Times New Roman', serif; }
+
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+.shimmer {
+  background: linear-gradient(90deg, #F0F0F0 0%, #DADADA 50%, #F0F0F0 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}

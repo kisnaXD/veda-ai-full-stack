@@ -1,0 +1,25 @@
+{
+  "name": "vedaai-assessment-creator",
+  "version": "1.0.0",
+  "private": true,
+  "description": "VedaAI – AI Assessment Creator (Full Stack)",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web -c blue,magenta \"npm run dev -w @vedaai/api\" \"npm run dev -w @vedaai/web\"",
+    "dev:api": "npm run dev -w @vedaai/api",
+    "dev:web": "npm run dev -w @vedaai/web",
+    "build": "npm run build -w @vedaai/shared && npm run build -w @vedaai/api && npm run build -w @vedaai/web",
+    "infra:up": "docker compose up -d",
+    "infra:down": "docker compose down",
+    "infra:logs": "docker compose logs -f"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
