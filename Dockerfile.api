@@ -20,7 +20,12 @@ COPY packages/shared/package.json packages/shared/
 COPY apps/api/package.json apps/api/
 COPY apps/web/package.json apps/web/
 
-RUN npm ci --workspaces --include-workspace-root --include=dev --ignore-scripts
+RUN npm ci \
+    --workspace=@vedaai/shared \
+    --workspace=@vedaai/api \
+    --include-workspace-root \
+    --include=dev \
+    --ignore-scripts
 
 COPY packages/shared packages/shared
 COPY apps/api apps/api
